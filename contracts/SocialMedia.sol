@@ -44,7 +44,7 @@ contract SocialMedia is GSNRecipient {
 
     }
 
-    Post[] AllPosts;
+    Post[] allPosts;
 
     mapping(address => Identity) public identities;    
     mapping(address => bool) public signedIn;
@@ -106,30 +106,23 @@ contract SocialMedia is GSNRecipient {
     }
 
 //Post function
-    function makePost(string _postContent, _nftName, _nftSymbol ) external {
-        require(signedIn[msg.sender], "User not signed in");
+    function makePost(string _postContent) external {
+        require(signedIn[msg.sender], "User not signed in");    
 
-        nftFactoryContract.createNFT(_nftName, _nftSymbol);
+        _newId = INftFactory(nftFactoryContract).mint(msg.sender, _tokenUri);
 
-        newId = postCount + 1;
-
-        nftFactoryContract.createNFT("_nftName", "nftSymbol");
-
-        Post storage newPost = posts[msg.sender][Post.postId];
-        newPost.postId = newId;
+        Post storage newPost = posts[msg.sender][_newId];
+        newPost.postId = _newId;
+        newPost.tokenUri = _tokenUri;
         newPost.postContent = _postContent;
         newPost.owner = msg.sender;
         newPost.likes = 0;
         newPost.comments = 0;
-        newPost.timePosted = block.timestamp;
-
-        uint256 tokenId = tokenIdCounter;
-        _safeMint(msg.sender, tokenId);
-        _setTokenURI(tokenId, string(abi.encodePacked("https://api.example.com/posts/", tokenId.toString())));
-
-        tokenIdCounter++;
+        newPost.timePosted = block.timestamp;      
 
         postCount += 1
+
+        allPosts.push(newPost);
     }
 
     function likePost(uint256 _postId) external {
