@@ -6,7 +6,19 @@ import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts-ethereum-package/contracts/GSN/GSNRecipient.sol";
-import "./NftFactory.sol";
+import "./CreateNft.sol";
+
+
+interface INftFactory {
+    function createNFTContract(
+        address _initialOwner
+    ) external returns (NFTS newNft_, uint length_);
+
+    function mint(
+        address to,
+        string memory uri
+    ) external returns (uint tokenId);
+}
 
 
 contract SocialMedia is GSNRecipient {
@@ -23,6 +35,7 @@ contract SocialMedia is GSNRecipient {
 
     struct Post{
         uint256 postId;
+        string tokenUri;
         string postContent;
         address owner;
         uint256 likes;
@@ -93,7 +106,7 @@ contract SocialMedia is GSNRecipient {
     }
 
 //Post function
-    function makePost(string _postContent, _nftName, _nftSymbol ) public {
+    function makePost(string _postContent, _nftName, _nftSymbol ) external {
         require(signedIn[msg.sender], "User not signed in");
 
         nftFactoryContract.createNFT(_nftName, _nftSymbol);
@@ -102,10 +115,11 @@ contract SocialMedia is GSNRecipient {
 
         nftFactoryContract.createNFT("_nftName", "nftSymbol");
 
-        Post memory newPost = posts[msg.sender][Post.postId];
+        Post storage newPost = posts[msg.sender][Post.postId];
         newPost.postId = newId;
         newPost.postContent = _postContent;
         newPost.owner = msg.sender;
+        newPost.likes = 0;
         newPost.comments = 0;
         newPost.timePosted = block.timestamp;
 
@@ -118,13 +132,22 @@ contract SocialMedia is GSNRecipient {
         postCount += 1
     }
 
-    function likePost(uint256 ) {
+    function likePost(uint256 _postId) external {
         require(signedIn[msg.sender], "User not signed in");
+        require(!liked[msg.sender][_postId], "you liked this post already!");
+
+        Post memory newlike = liked[msg.sender][_postId];
+        newlike.likes = newlike.likes + 1;
 
     }
 
+    function commentOnPost(_postId) external {
+        require(signedIn[msg.sender], "Please sign in to comment");
+        
 
-    function commentonPost(){} 
+        Post memory newcomment = posts[msg.sender][_postId];
+        newlike.likes = newlike.likes + 1;
+     } 
 
     function createGroup() {}
     

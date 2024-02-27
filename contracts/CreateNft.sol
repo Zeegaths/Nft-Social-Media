@@ -1,19 +1,21 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
-import "@openzeppelin/contracts/utils/Strings.sol";
 
-contract CreateNft is ERC721, Ownable {
+import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
+import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
+
+
+contract CreateNft is ERC721URIStorage, Ownable {
     using Strings for uint256;
 
-    uint256 public tokenIdCounter;
-        
+    uint256 public tokenIdCounter;    
 
-    constructor(string memory name, string memory symbol) ERC721(name, symbol) {
-        
-    }
+
+    constructor(
+        address initialOwner
+    ) ERC721("NFTS", "NFT") Ownable() {}
 
     function mintNFT() external onlyOwner {        
         uint256 newItemId = tokenIdCounter;
@@ -21,10 +23,18 @@ contract CreateNft is ERC721, Ownable {
         tokenIdCounter++;
     }
 
-    function tokenURI(uint256 tokenId) public view override returns (string memory) {
-        require(_exists(tokenId), "URI query for nonexistent token");
+    function safeMint(
+        address to,
+        string memory uri
+    ) external onlyOwner returns (uint tokenId) {
+        tokenId = tokenIdCounter++;
+        _safeMint(to, tokenId);
+        _setTokenURI(tokenId, uri);
+    }
 
-        string memory baseURI = "https://api.example.com/metadata/";
-        return string(abi.encodePacked(baseURI, tokenId.toString()));
+    function tokenURI(
+        uint256 tokenId
+    ) public view override(ERC721URIStorage) returns (string memory) {
+        return super.tokenURI(tokenId);
     }
 }
