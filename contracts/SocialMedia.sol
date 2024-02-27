@@ -13,14 +13,30 @@ contract SocialMedia is GSNRecipient {
 
 
     NftFactory public nftFactoryContract;
+    uint256 postCount;
+    uint256 public tokenIdCounter;
 
     //user authentication
     struct Identity{
         string username;
     }
 
+    struct Post{
+        uint256 postId;
+        string postContent;
+        address owner;
+        bool[] liked;
+        string[] comments;
+        uint256 timePosted;
+
+    }
+
+    Post[] AllPosts;
+
     mapping(address => Identity) public identities;    
     mapping(address => bool) public signedIn;
+    mapping(uint256 => mapping(owner => Post)) public posts;
+
 
     event IdentityCreated(address indexed user, string username);
     event SignedIn(address indexed user);
@@ -62,11 +78,9 @@ contract SocialMedia is GSNRecipient {
         });
 
         emit IdentityCreated(msg.sender, _username);
-    }
+    }    
 
-
-    
-
+//User signIn
     function signIn() public {
         
         require(!signedIn[msg.sender], "Already signed in");
@@ -76,8 +90,37 @@ contract SocialMedia is GSNRecipient {
         emit SignedIn(msg.sender);
     }
 
-    function makePost() {}
+//Post function
+    function makePost(string _postContent, _nftName, _nftSymbol ) public {
+        require(signedIn[msg.sender], "User not signed in");
 
+        nftFactoryContract.createNFT(_nftName, _nftSymbol);
+
+        newId = postCount + 1;
+
+        nftFactoryContract.createNFT("_nftName", "nftSymbol");
+
+        Post memory newPost = posts[msg.sender][Post.postId];
+        newPost.postId = newId;
+        newPost.postContent = _postContent;
+        newPost.owner = msg.sender;
+        newPost.comments = 0;
+        newPost.timePosted = block.timestamp;
+
+        uint256 tokenId = tokenIdCounter;
+        _safeMint(msg.sender, tokenId);
+        _setTokenURI(tokenId, string(abi.encodePacked("https://api.example.com/posts/", tokenId.toString())));
+
+        tokenIdCounter++;
+
+        postCount += 1
+    }
+
+    function likePost(uint256 ) {}
+
+    function commentonPost(){} 
+
+    function createGroup() {}
     
 
 }
