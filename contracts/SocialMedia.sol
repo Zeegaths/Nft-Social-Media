@@ -25,7 +25,7 @@ contract SocialMedia is GSNRecipient {
         uint256 postId;
         string postContent;
         address owner;
-        bool[] liked;
+        uint256 likes;
         string[] comments;
         uint256 timePosted;
 
@@ -35,7 +35,9 @@ contract SocialMedia is GSNRecipient {
 
     mapping(address => Identity) public identities;    
     mapping(address => bool) public signedIn;
-    mapping(uint256 => mapping(owner => Post)) public posts;
+    mapping(uint256 => address ) public posts;
+    mapping(uint256 => mapping(address => bool)) public liked;
+
 
 
     event IdentityCreated(address indexed user, string username);
@@ -116,7 +118,11 @@ contract SocialMedia is GSNRecipient {
         postCount += 1
     }
 
-    function likePost(uint256 ) {}
+    function likePost(uint256 ) {
+        require(signedIn[msg.sender], "User not signed in");
+
+    }
+
 
     function commentonPost(){} 
 
