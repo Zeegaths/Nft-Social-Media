@@ -20,7 +20,6 @@ interface INftFactory {
     ) external returns (uint tokenId);
 }
 
-
 contract SocialMedia is GSNRecipient {
 
     NftFactory public nftFactoryContract;
@@ -33,7 +32,8 @@ contract SocialMedia is GSNRecipient {
     struct Identity{
         string username;
     }
-
+    
+    //Posts
     struct Post {
         uint256 postId;
         string tokenUri;
@@ -42,11 +42,11 @@ contract SocialMedia is GSNRecipient {
         uint256 likes;
         string[] comments;
         uint256 timePosted;
-
     }
 
     Post[] allPosts;
 
+    //Groups
     struct Group {
         address groupAdmin;
         string name;
@@ -60,7 +60,6 @@ contract SocialMedia is GSNRecipient {
     mapping(uint256 => address ) public posts;
     mapping(uint256 => mapping(address => bool)) public liked;
     mapping(uint256 => string) public Groups;
-
 
 
     event IdentityCreated(address indexed user, string username);
@@ -93,7 +92,11 @@ contract SocialMedia is GSNRecipient {
     function _postRelayedCall(bytes memory context, bool, uint256 actualCharge, bytes32) internal {
     }
 
-//register user
+    event PostCreated{}
+    event GroupCreated{}
+    event CommentPosted{}
+
+// register user
     function registerUser(string memory _username) public {
         require(bytes(_username).length > 0, "Username cannot be empty");
         require(bytes(identities[msg.sender].username).length == 0, "Identity already exists");
@@ -161,15 +164,32 @@ contract SocialMedia is GSNRecipient {
 
         _groupId = groupCount + 1;
 
-        require(bytes(Groups[_groupId].name).length == 0, "Identity already exists");
-               
+        require(bytes(Groups[_groupId].name).length == 0, "Identity already exists");               
 
         Group storage newGroup = groups[_groupId];
         newGroup.groupAdmin = msg.sender;
         newGroup.name = _name;
         newGroup.description = _description;
         newGroup.members = _members;
+
+        groupCount = groupCount + 1;
+        
+        allGroups.push(newGroup);
     }    
+
+    //Join a group
+    function joinGroup(string memory _groupId) {
+        require(signedIn[msg.sender], "Sign in to join group");
+        require(_groupId > 0 && _groupId <= groupCount, "Invalid group ID");
+    }
+
+    function acceptNewMembers() external onlyAdmin{}
+ 
+    function searchPost(uint256 _postId) {}
+
+    function refreshPage() external view returns(Posts[]) {
+        return allPosts;
+    }
 
 }
     
