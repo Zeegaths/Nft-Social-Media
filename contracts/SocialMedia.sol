@@ -23,17 +23,18 @@ interface INftFactory {
 
 contract SocialMedia is GSNRecipient {
 
-
     NftFactory public nftFactoryContract;
     uint256 postCount;
     uint256 public tokenIdCounter;
+    uint256 groupCount;
+    address groupAdmin;
 
     //user authentication
     struct Identity{
         string username;
     }
 
-    struct Post{
+    struct Post {
         uint256 postId;
         string tokenUri;
         string postContent;
@@ -46,10 +47,19 @@ contract SocialMedia is GSNRecipient {
 
     Post[] allPosts;
 
+    struct Group {
+        address groupAdmin;
+        string name;
+        string description;
+        Identity[] members;
+    }
+    Group[] allGroups;
+
     mapping(address => Identity) public identities;    
     mapping(address => bool) public signedIn;
     mapping(uint256 => address ) public posts;
     mapping(uint256 => mapping(address => bool)) public liked;
+    mapping(uint256 => string) public Groups;
 
 
 
@@ -125,6 +135,7 @@ contract SocialMedia is GSNRecipient {
         allPosts.push(newPost);
     }
 
+//Like a post
     function likePost(uint256 _postId) external {
         require(signedIn[msg.sender], "User not signed in");
         require(!liked[msg.sender][_postId], "you liked this post already!");
@@ -134,6 +145,7 @@ contract SocialMedia is GSNRecipient {
 
     }
 
+//comment on posts
     function commentOnPost(_postId) external {
         require(signedIn[msg.sender], "Please sign in to comment");
         
@@ -142,8 +154,22 @@ contract SocialMedia is GSNRecipient {
         newlike.likes = newlike.likes + 1;
      } 
 
-    function createGroup() {}
-    
+//create group/community
+    function createGroup(string _name, string _description, Identity[] _members) {
+        require(msg.sender != address(0), "address zero detected");
+        require(signedIn[msg.sender], "Sign in to create group"); 
+
+        _groupId = groupCount + 1;
+
+        require(bytes(Groups[_groupId].name).length == 0, "Identity already exists");
+               
+
+        Group storage newGroup = groups[_groupId];
+        newGroup.groupAdmin = msg.sender;
+        newGroup.name = _name;
+        newGroup.description = _description;
+        newGroup.members = _members;
+    }    
 
 }
     
