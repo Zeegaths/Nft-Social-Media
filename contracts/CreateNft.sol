@@ -13,20 +13,16 @@ contract CreateNft is ERC721URIStorage, Ownable {
     uint256 public tokenIdCounter;    
 
 
-    constructor(
-        address initialOwner
-    ) ERC721("NFTS", "NFT") Ownable() {}
-
-    function mintNFT() external onlyOwner {        
-        uint256 newItemId = tokenIdCounter;
-        _safeMint(msg.sender, newItemId);
-        tokenIdCounter++;
+   constructor(        
+        string memory name,
+        string memory symbol
+    ) ERC721(name, symbol) Ownable() {
+        
     }
-
     function safeMint(
         address to,
         string memory uri
-    ) external onlyOwner returns (uint tokenId) {
+    ) external returns (uint tokenId) {
         tokenId = tokenIdCounter++;
         _safeMint(to, tokenId);
         _setTokenURI(tokenId, uri);

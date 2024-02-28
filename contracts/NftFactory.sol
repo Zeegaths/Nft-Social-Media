@@ -16,9 +16,10 @@ contract NftFactory {
     mapping(address => address) public userContract;
 
     function createNFTContract(
-        address _initialOwner
-    ) external returns (CreateNft newNft_, uint length_) {
-        newNft_ = new CreateNft(_initialOwner);
+        string memory name,
+        string memory symbol
+            ) external returns (CreateNft newNft_, uint length_) {
+        newNft_ = new CreateNft(name, symbol);
 
         userContract[msg.sender] = address(newNft_);
 
